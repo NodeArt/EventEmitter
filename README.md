@@ -4,7 +4,7 @@
 
 Methods:
 ```javascript
-const EventEmitter = require('@nodeart/eventEmitter');
+const EventEmitter = require('@nodeart/event_emitter');
 const events = new EventEmitter();
 events.on(eventName, ...fns)
 events.once(eventName, ...fns)

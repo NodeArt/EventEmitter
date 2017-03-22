@@ -1,6 +1,6 @@
 {
-  "name": "@nodeart/eventEmitter",
-  "version": "1.0.7",
+  "name": "@nodeart/event_emitter",
+  "version": "1.0.0",
   "description": "Simple EventEmitter pattern",
   "main": "./src/index.js",
   "repository": {
