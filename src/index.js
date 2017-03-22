@@ -2,9 +2,9 @@
 
 const subscribe = once => {
       return function(eventName, ...args) {
-          const arrOfSubscribers = this.events[eventName] || [];
-          args.forEach(fn => arrOfSubscribers.push({ fn: fn, once: once }));
-          this.events[eventName] = arrOfSubscribers;
+          const eventsArr = this.events[eventName] || [];
+          args.forEach(fn => eventsArr.push({ fn: fn, once: once }));
+          this.events[eventName] = eventsArr;
           return this;
       };
   },
@@ -25,13 +25,10 @@ EventEmitter.prototype.once = function (...args) {
 
 EventEmitter.prototype.emit = function(eventName, ...args) {
     if (!this.events[eventName]) return this;
-    for (let i = 0; i < this.events[eventName].length; i++) {
-        let obj = this.events[eventName][i];
-        obj.fn(...args);
-        if (obj.once) {
-            this.events[eventName].splice(i, 1);
-        }
-    }
+    this.events[eventName] = this.events[eventName].filter(elem => {
+        elem.fn(...args);
+        return !elem.once;
+    });
     return this;
 };
 
