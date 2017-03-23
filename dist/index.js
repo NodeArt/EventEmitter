@@ -17,16 +17,16 @@
 
         var subscribe = function subscribe(once) {
             return function (eventName) {
-                var arrOfSubscribers = this.events[eventName] || [];
+                var eventsArr = this.events[eventName] || [];
 
                 for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                     args[_key - 1] = arguments[_key];
                 }
 
                 args.forEach(function (fn) {
-                    return arrOfSubscribers.push({ fn: fn, once: once });
+                    return eventsArr.push({ fn: fn, once: once });
                 });
-                this.events[eventName] = arrOfSubscribers;
+                this.events[eventName] = eventsArr;
                 return this;
             };
         },
@@ -54,19 +54,15 @@
         };
 
         EventEmitter.prototype.emit = function (eventName) {
-            if (!this.events[eventName]) return this;
-
             for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
                 args[_key4 - 1] = arguments[_key4];
             }
 
-            for (var i = 0; i < this.events[eventName].length; i++) {
-                var obj = this.events[eventName][i];
-                obj.fn.apply(obj, args);
-                if (obj.once) {
-                    this.events[eventName].splice(i, 1);
-                }
-            }
+            if (!this.events[eventName]) return this;
+            this.events[eventName] = this.events[eventName].filter(function (elem) {
+                elem.fn.apply(elem, args);
+                return !elem.once;
+            });
             return this;
         };
 
