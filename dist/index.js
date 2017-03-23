@@ -17,16 +17,14 @@
 
         var subscribe = function subscribe(once) {
             return function (eventName) {
-                var eventsArr = this.events[eventName] || [];
-
                 for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                     args[_key - 1] = arguments[_key];
                 }
 
-                args.forEach(function (fn) {
-                    return eventsArr.push({ fn: fn, once: once });
-                });
-                this.events[eventName] = eventsArr;
+                this.events[eventName] = args.reduce(function (acc, fn) {
+                    acc.push({ fn: fn, once: once });
+                    return acc;
+                }, this.events[eventName] || []);
                 return this;
             };
         },

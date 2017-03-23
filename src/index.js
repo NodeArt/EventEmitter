@@ -2,9 +2,10 @@
 
 const subscribe = once => {
       return function(eventName, ...args) {
-          const eventsArr = this.events[eventName] || [];
-          args.forEach(fn => eventsArr.push({ fn: fn, once: once }));
-          this.events[eventName] = eventsArr;
+          this.events[eventName] = args.reduce((acc, fn) => {
+              acc.push({ fn: fn, once: once });
+              return acc;
+          }, this.events[eventName] || []);
           return this;
       };
   },
