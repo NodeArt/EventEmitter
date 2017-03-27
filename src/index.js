@@ -27,7 +27,7 @@ EventEmitter.prototype.once = function (...args) {
 EventEmitter.prototype.emit = function(eventName, ...args) {
     if (!this.events[eventName]) return this;
     this.events[eventName] = this.events[eventName].filter(elem => {
-        elem.fn(...args);
+        elem.fn.apply(this, args);
         return !elem.once;
     });
     return this;

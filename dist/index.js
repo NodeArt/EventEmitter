@@ -52,13 +52,15 @@
         };
 
         EventEmitter.prototype.emit = function (eventName) {
+            var _this = this;
+
             for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
                 args[_key4 - 1] = arguments[_key4];
             }
 
             if (!this.events[eventName]) return this;
             this.events[eventName] = this.events[eventName].filter(function (elem) {
-                elem.fn.apply(elem, args);
+                elem.fn.apply(_this, args);
                 return !elem.once;
             });
             return this;
