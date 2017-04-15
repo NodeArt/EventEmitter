@@ -24,10 +24,10 @@ EventEmitter.prototype.once = function (...args) {
     return once.apply(this, args);
 };
 
-EventEmitter.prototype.emit = function(eventName, ...args) {
+EventEmitter.prototype.emit = function(eventName, ctx, ...args) {
     if (!this.events[eventName]) return this;
     this.events[eventName] = this.events[eventName].filter(elem => {
-        elem.fn.apply(this, args);
+        elem.fn.apply(ctx, args);
         return !elem.once;
     });
     return this;
@@ -35,9 +35,16 @@ EventEmitter.prototype.emit = function(eventName, ...args) {
 
 EventEmitter.prototype.off = function(eventName, ...fns) {
     if (!this.events[eventName]) return this;
-    fns.length > 0 ?
-      this.events[eventName] = this.events[eventName].filter(listener => !fns.includes(listener.fn)) :
+    if (fns.length) {
+      const tasksLeft = this.events[eventName].filter(listener => !fns.includes(listener.fn));
+      if (tasksLeft.length) {
+          this.events[eventName] = tasksLeft;
+      } else {
+          delete this.events[eventName];
+      }
+    } else {
       delete this.events[eventName];
+    }
     return this;
 };
 

@@ -51,16 +51,14 @@
             return once.apply(this, args);
         };
 
-        EventEmitter.prototype.emit = function (eventName) {
-            var _this = this;
-
-            for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-                args[_key4 - 1] = arguments[_key4];
+        EventEmitter.prototype.emit = function (eventName, ctx) {
+            for (var _len4 = arguments.length, args = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+                args[_key4 - 2] = arguments[_key4];
             }
 
             if (!this.events[eventName]) return this;
             this.events[eventName] = this.events[eventName].filter(function (elem) {
-                elem.fn.apply(_this, args);
+                elem.fn.apply(ctx, args);
                 return !elem.once;
             });
             return this;
@@ -72,9 +70,18 @@
             }
 
             if (!this.events[eventName]) return this;
-            fns.length > 0 ? this.events[eventName] = this.events[eventName].filter(function (listener) {
-                return !fns.includes(listener.fn);
-            }) : delete this.events[eventName];
+            if (fns.length) {
+                var tasksLeft = this.events[eventName].filter(function (listener) {
+                    return !fns.includes(listener.fn);
+                });
+                if (tasksLeft.length) {
+                    this.events[eventName] = tasksLeft;
+                } else {
+                    delete this.events[eventName];
+                }
+            } else {
+                delete this.events[eventName];
+            }
             return this;
         };
 
