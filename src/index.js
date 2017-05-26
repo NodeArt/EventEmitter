@@ -1,56 +1,140 @@
+/**
+ * @author Ivan Prodaiko <prodaiko94@gmail.com>
+ */
+
 "use strict";
 
-const subscribe = once => {
+const subscribe = times => {
       return function(eventName, ...args) {
-          this.events[eventName] = args.reduce((acc, fn) => {
-              acc.push({ fn: fn, once: once });
+          this._events[eventName] = args.reduce((acc, fn) => {
+              const toPush = { fn };
+              if (times) {
+                  Object.assign(toPush, { times, count: 0 });
+              }
+              acc.push(toPush);
               return acc;
-          }, this.events[eventName] || []);
+          }, this._events[eventName] || []);
           return this;
       };
   },
-  on = subscribe(false),
-  once = subscribe(true);
+  on = subscribe(),
+  once = subscribe(1);
+
+/**
+ * Creates a new EventEmitter
+ * @constructor
+ */
 
 function EventEmitter() {
-    this.events = {};
+    /**
+     * @private _events
+     */
+    Object.defineProperty(this, '_events', { value: {}, writable: true });
 }
 
-EventEmitter.prototype.on = function (...args) {
-    return on.apply(this, args);
+/**
+ *
+ * @param eventName
+ * @type string
+ * @param args
+ * @type Function
+ * @return {EventEmitter}
+ */
+
+EventEmitter.prototype.on = function (eventName, ...args) {
+    return on.apply(this, [eventName, ...args]);
 };
 
-EventEmitter.prototype.once = function (...args) {
-    return once.apply(this, args);
+/**
+ *
+ * @param eventName
+ * @type string
+ * @param args
+ * @type Function
+ * @return {EventEmitter}
+ */
+
+EventEmitter.prototype.once = function (eventName, ...args) {
+    return once.apply(this, [eventName, ...args]);
 };
+
+/**
+ *
+ * @param eventName
+ * @type string
+ * @param times
+ * @type number
+ * @param args
+ * @type Function
+ * @return {EventEmitter}
+ */
+
+EventEmitter.prototype.times = function (eventName, times, ...args) {
+    return times > 0 ? subscribe(times).apply(this, [eventName, ...args]) : this;
+};
+
+/**
+ *
+ * @param eventName
+ * @type string
+ * @param ctx
+ * @param args
+ * @return {EventEmitter}
+ */
 
 EventEmitter.prototype.emit = function(eventName, ctx, ...args) {
-    if (!this.events[eventName]) return this;
-    this.events[eventName] = this.events[eventName].filter(elem => {
+    if (!this._events[eventName]) return this;
+    this._events[eventName] = this._events[eventName].filter(elem => {
         elem.fn.apply(ctx, args);
-        return !elem.once;
+        if (elem.times) {
+            elem.count += 1;
+        }
+        return elem.count ? (elem.times !== elem.count) : true;
     });
     return this;
 };
 
+/**
+ *
+ * @param eventName
+ * @type string
+ * @param fns
+ * @return {EventEmitter}
+ */
+
 EventEmitter.prototype.off = function(eventName, ...fns) {
-    if (!this.events[eventName]) return this;
+    if (!this._events[eventName]) return this;
     if (fns.length) {
-      const tasksLeft = this.events[eventName].filter(listener => !fns.includes(listener.fn));
+      const tasksLeft = this._events[eventName].filter(listener => !fns.includes(listener.fn));
       if (tasksLeft.length) {
-          this.events[eventName] = tasksLeft;
+          this._events[eventName] = tasksLeft;
       } else {
-          delete this.events[eventName];
+          delete this._events[eventName];
       }
     } else {
-      delete this.events[eventName];
+      delete this._events[eventName];
     }
     return this;
 };
 
+/**
+ *
+ * @return {EventEmitter}
+ */
+
 EventEmitter.prototype.offAll = function () {
-    this.events = {};
+    this._events = {};
     return this;
+};
+
+/**
+ *
+ * @param successor
+ * @type Object
+ */
+EventEmitter.extend = function (successor) {
+    EventEmitter.call(successor);
+    Object.setPrototypeOf(successor, EventEmitter.prototype)
 };
 
 if (typeof module !== 'undefined' && module.exports) {

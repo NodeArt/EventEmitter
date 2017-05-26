@@ -24,7 +24,7 @@ events
   )
   .emit('event1', ctx, 1, 2, 3);
 
-assert.equal(Object.keys(events.events['event1']).length, 2, 'Once test error');
+assert.equal(Object.keys(events._events['event1']).length, 2, 'Once test error');
 
 const fn = (...args) => assert.deepEqual(args, [1, 2, 3], 'Args test error');
 
@@ -33,10 +33,10 @@ events
   .emit('event2', null, 1, 2, 3)
   .off('event2', fn);
 
-assert.equal(events.events['event2'], undefined, 'Off test error');
+assert.equal(events._events['event2'], undefined, 'Off test error');
 
 events
   .on('event2', fn)
   .offAll();
 
-assert.deepEqual(events.events, {}, 'OffAll test error');
+assert.deepEqual(events._events, {}, 'OffAll test error');
