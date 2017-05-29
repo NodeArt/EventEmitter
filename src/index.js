@@ -5,17 +5,20 @@
 "use strict";
 
 const subscribe = times => {
-      return function(eventName, ...args) {
-          this._events[eventName] = args.reduce((acc, fn) => {
-              const toPush = { fn };
-              if (times) {
-                  Object.assign(toPush, { times, count: 0 });
-              }
-              acc.push(toPush);
-              return acc;
-          }, this._events[eventName] || []);
-          return this;
-      };
+    return function(eventName, ...args) {
+      this._events.set(
+        eventName,
+        args.reduce((acc, fn) => {
+          const toPush = { fn };
+          if (times) {
+            Object.assign(toPush, { times, count: 0 });
+          }
+          acc.push(toPush);
+          return acc;
+        }, this._events.get(eventName) || [])
+      );
+      return this;
+    };
   },
   on = subscribe(),
   once = subscribe(1);
@@ -26,10 +29,10 @@ const subscribe = times => {
  */
 
 function EventEmitter() {
-    /**
-     * @private _events
-     */
-    Object.defineProperty(this, '_events', { value: {}, writable: true });
+  /**
+   * @private _events
+   */
+  Object.defineProperty(this, '_events', { value: new Map(), writable: true });
 }
 
 /**
@@ -42,7 +45,7 @@ function EventEmitter() {
  */
 
 EventEmitter.prototype.on = function (eventName, ...args) {
-    return on.apply(this, [eventName, ...args]);
+  return on.apply(this, [eventName, ...args]);
 };
 
 /**
@@ -55,7 +58,7 @@ EventEmitter.prototype.on = function (eventName, ...args) {
  */
 
 EventEmitter.prototype.once = function (eventName, ...args) {
-    return once.apply(this, [eventName, ...args]);
+  return once.apply(this, [eventName, ...args]);
 };
 
 /**
@@ -70,7 +73,7 @@ EventEmitter.prototype.once = function (eventName, ...args) {
  */
 
 EventEmitter.prototype.times = function (eventName, times, ...args) {
-    return times > 0 ? subscribe(times).apply(this, [eventName, ...args]) : this;
+  return times > 0 ? subscribe(times).apply(this, [eventName, ...args]) : this;
 };
 
 /**
@@ -83,15 +86,16 @@ EventEmitter.prototype.times = function (eventName, times, ...args) {
  */
 
 EventEmitter.prototype.emit = function(eventName, ctx, ...args) {
-    if (!this._events[eventName]) return this;
-    this._events[eventName] = this._events[eventName].filter(elem => {
-        elem.fn.apply(ctx, args);
-        if (elem.times) {
-            elem.count += 1;
-        }
-        return elem.count ? (elem.times !== elem.count) : true;
-    });
-    return this;
+  if (!this._events.has(eventName)) return this;
+  const listeners = this._events.get(eventName).filter(elem => {
+    elem.fn.apply(ctx, args);
+    if (elem.times) {
+      elem.count += 1;
+    }
+    return elem.count ? (elem.times !== elem.count) : true;
+  });
+  listeners.length ? this._events.set(eventName, listeners) : this._events.delete(eventName);
+  return this;
 };
 
 /**
@@ -103,18 +107,18 @@ EventEmitter.prototype.emit = function(eventName, ctx, ...args) {
  */
 
 EventEmitter.prototype.off = function(eventName, ...fns) {
-    if (!this._events[eventName]) return this;
-    if (fns.length) {
-      const tasksLeft = this._events[eventName].filter(listener => !fns.includes(listener.fn));
-      if (tasksLeft.length) {
-          this._events[eventName] = tasksLeft;
-      } else {
-          delete this._events[eventName];
-      }
+  if (!this._events.has(eventName)) return this;
+  if (fns.length) {
+    const tasksLeft = this._events.get(eventName).filter(listener => !fns.includes(listener.fn));
+    if (tasksLeft.length) {
+      this._events.set(eventName, tasksLeft);
     } else {
-      delete this._events[eventName];
+      this._events.delete(eventName);
     }
-    return this;
+  } else {
+    this._events.delete(eventName);
+  }
+  return this;
 };
 
 /**
@@ -123,8 +127,19 @@ EventEmitter.prototype.off = function(eventName, ...fns) {
  */
 
 EventEmitter.prototype.offAll = function () {
-    this._events = {};
-    return this;
+  this._events.clear();
+  return this;
+};
+
+/**
+ *
+ * @param successor
+ * @type Object
+ */
+EventEmitter.inherit = function (successor) {
+  EventEmitter.call(successor);
+  Object.setPrototypeOf(successor, EventEmitter.prototype);
+  return successor;
 };
 
 /**
@@ -133,13 +148,14 @@ EventEmitter.prototype.offAll = function () {
  * @type Object
  */
 EventEmitter.extend = function (successor) {
-    EventEmitter.call(successor);
-    Object.setPrototypeOf(successor, EventEmitter.prototype)
+  EventEmitter.call(successor);
+  Object.assign(successor, EventEmitter.prototype);
+  return successor;
 };
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = EventEmitter;
+  module.exports = EventEmitter;
 }
 if (typeof window !== 'undefined' && document) {
-    window.EventEmitter = EventEmitter;
+  window.EventEmitter = EventEmitter;
 }
