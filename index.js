@@ -32,24 +32,11 @@ function EventEmitter() {
   /**
    * @private _events
    */
-  Object.defineProperty(this, '_events', { value: new Map(), writable: true });
+  Object.defineProperty(this, '_events', { value: new Map() });
 }
 
 /**
- *
- * @param eventName
- * @type string
- * @param args
- * @type Function
- * @return {EventEmitter}
- */
-
-EventEmitter.prototype.on = function (eventName, ...args) {
-  return on.apply(this, [eventName, ...args]);
-};
-
-/**
- *
+ * Subscribe once
  * @param eventName
  * @type string
  * @param args
@@ -62,7 +49,7 @@ EventEmitter.prototype.once = function (eventName, ...args) {
 };
 
 /**
- *
+ * Subscribe for particular number of times
  * @param eventName
  * @type string
  * @param times
@@ -77,7 +64,20 @@ EventEmitter.prototype.times = function (eventName, times, ...args) {
 };
 
 /**
- *
+ * Subscribe until unsubscribe will be called
+ * @param eventName
+ * @type string
+ * @param args
+ * @type Function
+ * @return {EventEmitter}
+ */
+
+EventEmitter.prototype.on = function (eventName, ...args) {
+  return on.apply(this, [eventName, ...args]);
+};
+
+/**
+ * Emit event
  * @param eventName
  * @type string
  * @param ctx
@@ -99,7 +99,7 @@ EventEmitter.prototype.emit = function(eventName, ctx, ...args) {
 };
 
 /**
- *
+ * Unsubscribe from event
  * @param eventName
  * @type string
  * @param fns
@@ -122,7 +122,7 @@ EventEmitter.prototype.off = function(eventName, ...fns) {
 };
 
 /**
- *
+ * Unsubscribe from all events at once
  * @return {EventEmitter}
  */
 
@@ -132,7 +132,7 @@ EventEmitter.prototype.offAll = function () {
 };
 
 /**
- *
+ * Set EventEmitter as prototype of an object
  * @param successor
  * @type Object
  */
@@ -143,7 +143,7 @@ EventEmitter.inherit = function (successor) {
 };
 
 /**
- *
+ * Use EventEmitter as a mixin for object
  * @param successor
  * @type Object
  */
