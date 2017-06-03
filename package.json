@@ -16,7 +16,6 @@
     "eventemitter",
     "listener"
   ],
-  "devDependencies": {},
   "engines": {
     "node": ">=6.0.0"
   },
