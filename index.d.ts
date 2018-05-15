@@ -6,5 +6,7 @@ declare class EventEmitter {
   emit(eventName: string, ctx: any, ...args: any[]): this
   off(eventName: string, ...fns: Function[]): this
   offAll(): this
+  static inherit(successor: any): any
+  static extend(successor: any): any
 }
 export = EventEmitter;

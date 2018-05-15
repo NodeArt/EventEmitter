@@ -10,6 +10,7 @@
   "scripts": {
     "test": "node ./tests.js"
   },
+  "typings": "index.d.ts",
   "keywords": [
     "nodeart",
     "emitter",
