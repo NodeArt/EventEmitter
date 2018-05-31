@@ -11,5 +11,5 @@ declare class EventEmitter {
 }
 export = EventEmitter;
 declare global {
-	export const EventEmitter: EventEmitter
+  export const EventEmitter: EventEmitter
 }
