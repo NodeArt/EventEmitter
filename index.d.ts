@@ -10,3 +10,6 @@ declare class EventEmitter {
   static extend(successor: any): any
 }
 export = EventEmitter;
+declare global {
+  export const EventEmitter: EventEmitter
+}
