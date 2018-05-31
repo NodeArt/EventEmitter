@@ -153,6 +153,8 @@ EventEmitter.extend = function (successor) {
   return successor;
 };
 
+EventEmitter.EventEmitter = EventEmitter;
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = EventEmitter;
 }
