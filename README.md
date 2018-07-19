@@ -1,6 +1,4 @@
-[![bitHound Overall Score](https://www.bithound.io/github/NodeArt/EventEmitter/badges/score.svg)](https://www.bithound.io/github/NodeArt/EventEmitter)
-[![bitHound Dependencies](https://www.bithound.io/github/NodeArt/EventEmitter/badges/dependencies.svg)](https://www.bithound.io/github/NodeArt/EventEmitter/master/dependencies/npm)
-[![bitHound Code](https://www.bithound.io/github/NodeArt/EventEmitter/badges/code.svg)](https://www.bithound.io/github/NodeArt/EventEmitter)
+# Event Emitter
 
 Methods:
 ```javascript
